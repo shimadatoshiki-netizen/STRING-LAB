@@ -29,6 +29,7 @@ import {
 } from '../theory/music.ts'
 import { guitarShapes, type GuitarShape } from '../theory/shapes.ts'
 import { cn } from './cn.ts'
+import { HelpTip } from './HelpTip.tsx'
 import { Segmented } from './ui.tsx'
 
 const ROLE_CLASS: Record<ToneRole, string> = {
@@ -74,8 +75,18 @@ export function FretboardView() {
   return (
     <section className="space-y-2">
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h2 className="font-display text-2xl font-semibold tracking-tight">指板</h2>
+        <div className="relative">
+          <div className="flex items-center gap-2">
+            <h2 className="font-display text-2xl font-semibold tracking-tight">指板</h2>
+            <HelpTip label="指板">
+              <ul className="space-y-2">
+                <li>フレットをタップすると、音名とオクターブ、度数を確認して鳴らせます。</li>
+                <li>構成音は選択中か再生中のコード、スケールは今のキーです。</li>
+                <li>ベースは選んだポジションを濃く表示します。点のあるポジションにルートがあります。</li>
+                <li>ギターではコードフォームを選ぶと、その形だけを濃く表示します。</li>
+              </ul>
+            </HelpTip>
+          </div>
           <p className="mt-1 text-sm text-muted">
             {session.boardMode === 'chord'
               ? `${displayChordSymbol(symbol)} の構成音`
@@ -229,7 +240,7 @@ export function FretboardView() {
                     session.instrument !== 'bass' || inBassWindow(fret, session.bassPosition)
                   const visible = Boolean(tone) && inShape
                   const dim = visible && !inWindow
-                  const pulse = visible && audio.playing && audio.beat === 0 && tone?.role === 'root'
+                  const pulse = visible && (audio.playing || audio.clicking) && audio.beat === 0 && tone?.role === 'root'
                   const selected = picked?.stringNumber === string.number && picked.fret === fret
                   return (
                     <button
@@ -279,13 +290,8 @@ export function FretboardView() {
       <p className="min-h-6 text-sm text-paper">
         {pickedCell
           ? `${pickedCell.stringNumber}弦 ${pickedCell.fret === 0 ? '開放' : `${pickedCell.fret}フレット`} · ${prettifyAccidentals(pickedCell.name)}${pickedCell.octave} · ${pickedCell.relation}`
-          : 'フレットをタップすると音名、オクターブ、度数を確認して鳴らせます。'}
+          : ''}
       </p>
-      {session.instrument === 'bass' && (
-        <p className="text-xs text-muted">
-          ベースは {session.bassPosition === 'all' ? '全フレット' : session.bassPosition === 0 ? '開放から5フレット' : `${session.bassPosition}〜${session.bassPosition + 4}フレット`} を濃く表示しています。点のあるポジションにルートがあります。
-        </p>
-      )}
     </section>
   )
 }

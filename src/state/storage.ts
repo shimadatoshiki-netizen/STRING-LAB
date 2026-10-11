@@ -1,4 +1,5 @@
 import { Chord } from 'tonal'
+import { defaultMetronome, readMetronome, type MetronomeSettings } from '../theory/metronome.ts'
 import {
   isCircleKey,
   type BoardMode,
@@ -31,6 +32,7 @@ export interface SessionState {
   timeSig: TimeSignature
   loop: boolean
   metronome: boolean
+  click: MetronomeSettings
   instrument: Instrument
   timbre: Timbre
   boardMode: BoardMode
@@ -75,6 +77,7 @@ export function defaultSession(): SessionState {
     timeSig: '4/4',
     loop: true,
     metronome: false,
+    click: defaultMetronome(),
     instrument: 'bass',
     timbre: 'clean',
     boardMode: 'chord',
@@ -129,6 +132,7 @@ export function loadSession(): SessionState {
       timeSig,
       loop: data.loop !== false,
       metronome: data.metronome === true,
+      click: readMetronome(data.click),
       instrument: data.instrument === 'guitar' ? 'guitar' : 'bass',
       timbre: data.timbre === 'warm' || data.timbre === 'slap' ? data.timbre : 'clean',
       boardMode: data.boardMode === 'scale' ? 'scale' : 'chord',

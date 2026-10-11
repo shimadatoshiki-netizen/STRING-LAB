@@ -14,6 +14,7 @@ import {
   type HarmonicFunction,
 } from '../theory/music.ts'
 import { cn } from './cn.ts'
+import { HelpTip } from './HelpTip.tsx'
 import { Segmented } from './ui.tsx'
 
 function point(index: number, radius: number) {
@@ -65,11 +66,15 @@ export function CircleView() {
 
   return (
     <section className="space-y-3">
-      <div>
+      <div className="relative flex items-center gap-2">
         <h2 className="font-display text-2xl font-semibold tracking-tight">五度圏</h2>
-        <p className="mt-1 text-sm text-muted">
-          色のついたコードをタップすると進行に入ります。うすいキーをタップするか、下の一覧から転調できます。
-        </p>
+        <HelpTip label="五度圏">
+          <ul className="space-y-2">
+            <li>色のついたコードをタップすると、進行の末尾に追加されます。</li>
+            <li>うすいキーをタップするか、下のキー一覧から転調できます。</li>
+            <li>緑はトニック、青はサブドミナント、黄はドミナントです。</li>
+          </ul>
+        </HelpTip>
       </div>
 
       <div className="flex flex-wrap gap-2">

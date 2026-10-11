@@ -8,6 +8,7 @@ import {
   romanForSymbol,
 } from '../theory/music.ts'
 import { cn } from './cn.ts'
+import { HelpTip } from './HelpTip.tsx'
 
 export function ProgressionView() {
   const { session, library, removeChord, moveChord, selectChord, clearProgression, saveCurrent, loadSong, deleteSong } =
@@ -19,10 +20,16 @@ export function ProgressionView() {
 
   return (
     <section className="space-y-5">
-      <div className="flex items-end justify-between gap-3">
-        <div>
+      <div className="relative flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
           <h2 className="font-display text-2xl font-semibold tracking-tight">コード進行</h2>
-          <p className="mt-1 text-sm text-muted">追加、並べ替え、保存。選択したコードが指板に出ます。</p>
+          <HelpTip label="コード進行">
+            <ul className="space-y-2">
+              <li>五度圏で追加したコードがここに並びます。</li>
+              <li>カードを選ぶと、そのコードが指板に出ます。前・後で並べ替え、×で削除します。</li>
+              <li>名前をつけて保存し、あとから読み込めます。</li>
+            </ul>
+          </HelpTip>
         </div>
         <button
           type="button"

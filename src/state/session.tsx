@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { diatonicChords } from '../theory/music.ts'
 import { familiarDegrees } from './active.ts'
+import { cycleAccent, type MetronomeSettings } from '../theory/metronome.ts'
 import {
   createId,
   loadLibrary,
@@ -39,6 +40,8 @@ interface SessionApi {
   setTimeSig: (timeSig: TimeSignature) => void
   setLoop: (loop: boolean) => void
   setMetronome: (metronome: boolean) => void
+  patchClick: (partial: Partial<MetronomeSettings>) => void
+  cycleAccent: (beat: number) => void
   setInstrument: (instrument: Instrument) => void
   setTimbre: (timbre: Timbre) => void
   setBoardMode: (boardMode: BoardMode) => void
@@ -124,6 +127,16 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       setTimeSig: (timeSig) => patch({ timeSig }),
       setLoop: (loop) => patch({ loop }),
       setMetronome: (metronome) => patch({ metronome }),
+      patchClick: (partial) => {
+        setSession((current) => ({ ...current, click: { ...current.click, ...partial } }))
+      },
+      cycleAccent: (beat) => {
+        setSession((current) => {
+          const accents = current.click.accents.slice()
+          accents[beat] = cycleAccent(accents[beat] ?? 'normal')
+          return { ...current, click: { ...current.click, accents } }
+        })
+      },
       setInstrument: (instrument) => patch({ instrument }),
       setTimbre: (timbre) => patch({ timbre }),
       setBoardMode: (boardMode) => patch({ boardMode }),

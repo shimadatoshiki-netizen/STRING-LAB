@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { useAudio } from '../audio/AudioProvider.tsx'
+import { MetronomePanel } from './MetronomePanel.tsx'
 import { resolveActiveSymbol } from '../state/active.ts'
 import { useSession } from '../state/session.tsx'
 import { diatonicChords, displayChordSymbol, meterOf, romanForSymbol, type Timbre, type TimeSignature } from '../theory/music.ts'
@@ -12,8 +14,9 @@ const TIMBRES: { value: Timbre; label: string }[] = [
 ]
 
 export function TransportBar() {
-  const { session, setBpm, setTimeSig, setLoop, setMetronome, setInstrument, setTimbre } = useSession()
+  const { session, setBpm, setTimeSig, setLoop, setInstrument, setTimbre } = useSession()
   const audio = useAudio()
+  const [metroOpen, setMetroOpen] = useState(false)
   const symbol = resolveActiveSymbol(session, audio.playing ? audio.index : null)
   const roman = romanForSymbol(
     symbol,
@@ -22,8 +25,18 @@ export function TransportBar() {
   const beats = meterOf(session.timeSig).beats
   const disabled = session.progression.length === 0
 
+  const metroOn = session.metronome || audio.clicking
+  const moving = audio.playing || audio.clicking
+
   return (
     <footer className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-ink/95 backdrop-blur">
+      {metroOpen && (
+        <div className="absolute inset-x-0 bottom-full border-t border-line bg-ink/95 backdrop-blur">
+          <div className="mx-auto max-h-[46dvh] max-w-5xl overflow-y-auto px-3 py-3">
+            <MetronomePanel />
+          </div>
+        </div>
+      )}
       <div className="mx-auto max-w-5xl px-3 pt-2 pb-[max(0.6rem,env(safe-area-inset-bottom))]">
         <div className="flex items-center gap-3">
           <button
@@ -102,14 +115,26 @@ export function TransportBar() {
         <div className="mt-1.5 flex items-center gap-2">
           <button
             type="button"
-            aria-pressed={session.metronome}
-            onClick={() => setMetronome(!session.metronome)}
+            aria-pressed={metroOn}
+            onClick={() => void audio.toggleClick()}
             className={cn(
               'h-8 shrink-0 rounded-full border px-3 text-xs whitespace-nowrap',
-              session.metronome ? 'border-tonic text-tonic' : 'border-line text-muted',
+              metroOn ? 'border-tonic text-tonic' : 'border-line text-muted',
             )}
           >
             メトロノーム
+          </button>
+          <button
+            type="button"
+            aria-expanded={metroOpen}
+            aria-label="メトロノームの詳細"
+            onClick={() => setMetroOpen((open) => !open)}
+            className={cn(
+              'inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border',
+              metroOpen ? 'border-tonic text-tonic' : 'border-line text-muted',
+            )}
+          >
+            <SlidersIcon />
           </button>
           <div className="flex shrink-0 gap-1" aria-hidden="true">
             {Array.from({ length: beats }, (_, beat) => (
@@ -117,7 +142,7 @@ export function TransportBar() {
                 key={beat}
                 className={cn(
                   'h-2 w-2 rounded-full',
-                  audio.playing && audio.beat === beat ? 'bg-tonic' : 'bg-white/20',
+                  moving && audio.beat === beat ? 'bg-tonic' : 'bg-white/20',
                 )}
               />
             ))}
@@ -173,6 +198,17 @@ function PauseIcon() {
   return (
     <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true">
       <path d="M6 4h3.2v14H6V4Zm6.8 0H16v14h-3.2V4Z" fill="currentColor" />
+    </svg>
+  )
+}
+
+function SlidersIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+      <path d="M2 4.5h12M2 8h12M2 11.5h12" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+      <circle cx="6" cy="4.5" r="1.4" fill="currentColor" />
+      <circle cx="11" cy="8" r="1.4" fill="currentColor" />
+      <circle cx="5" cy="11.5" r="1.4" fill="currentColor" />
     </svg>
   )
 }
