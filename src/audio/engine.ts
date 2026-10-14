@@ -41,7 +41,7 @@ export interface PlaySnapshot {
 }
 
 export type PlayEvent =
-  | { type: 'beat'; index: number | null; beat: number; mode: 'chords' | 'click' }
+  | { type: 'beat'; index: number | null; beat: number; part: number; mode: 'chords' | 'click' }
   | { type: 'bpm'; bpm: number }
   | { type: 'stop' }
 
@@ -295,12 +295,10 @@ function scheduleBar(
         if (groove) playDrums(drumHits(groove, beat, meter.beats, part), when, part === 0 && accent === 'strong')
         else playClick(snap.click.sound, part === 0 ? accent : 'tick', when)
       }
-      if (part === 0) {
-        getDraw().schedule(() => {
-          if (runMode === 'stop') return
-          emit({ type: 'beat', index, beat, mode })
-        }, when)
-      }
+      getDraw().schedule(() => {
+        if (runMode === 'stop') return
+        emit({ type: 'beat', index, beat, part, mode })
+      }, when)
     }
   }
 

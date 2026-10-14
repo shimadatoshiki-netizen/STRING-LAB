@@ -17,6 +17,7 @@ interface AudioApi {
   clicking: boolean
   index: number | null
   beat: number
+  part: number
   error: string | null
   toggle: () => Promise<void>
   toggleClick: () => Promise<void>
@@ -32,6 +33,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
   const [clicking, setClicking] = useState(false)
   const [index, setIndex] = useState<number | null>(null)
   const [beat, setBeat] = useState(0)
+  const [part, setPart] = useState(0)
   const [error, setError] = useState<string | null>(null)
   const setBpmRef = useRef(setBpm)
   setBpmRef.current = setBpm
@@ -60,6 +62,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
         setClicking(false)
         setIndex(null)
         setBeat(0)
+        setPart(0)
         return
       }
       if (event.type === 'bpm') {
@@ -75,6 +78,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
         setIndex(event.index)
       }
       setBeat(event.beat)
+      setPart(event.part)
     })
   }, [])
 
@@ -83,6 +87,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     clicking,
     index,
     beat,
+    part,
     error,
     toggle: async () => {
       if (playing) {

@@ -1,6 +1,8 @@
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useAudio } from '../audio/AudioProvider.tsx'
 import { MetronomePanel } from './MetronomePanel.tsx'
+import { MetronomeStage } from './MetronomeStage.tsx'
 import { resolveActiveSymbol } from '../state/active.ts'
 import { useSession } from '../state/session.tsx'
 import { diatonicChords, displayChordSymbol, meterOf, romanForSymbol, type Timbre, type TimeSignature } from '../theory/music.ts'
@@ -17,6 +19,7 @@ export function TransportBar() {
   const { session, setBpm, setTimeSig, setLoop, setInstrument, setTimbre } = useSession()
   const audio = useAudio()
   const [metroOpen, setMetroOpen] = useState(false)
+  const [stageOpen, setStageOpen] = useState(false)
   const symbol = resolveActiveSymbol(session, audio.playing ? audio.index : null)
   const roman = romanForSymbol(
     symbol,
@@ -30,6 +33,7 @@ export function TransportBar() {
 
   return (
     <footer className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-ink/95 backdrop-blur">
+      {stageOpen && createPortal(<MetronomeStage onClose={() => setStageOpen(false)} />, document.body)}
       {metroOpen && (
         <div className="absolute inset-x-0 bottom-full border-t border-line bg-ink/95 backdrop-blur">
           <div className="mx-auto max-h-[46dvh] max-w-5xl overflow-y-auto px-3 py-3">
@@ -136,7 +140,13 @@ export function TransportBar() {
           >
             <SlidersIcon />
           </button>
-          <div className="flex shrink-0 gap-1" aria-hidden="true">
+          <button
+            type="button"
+            aria-expanded={stageOpen}
+            aria-label="メトロノーム画面"
+            onClick={() => setStageOpen((open) => !open)}
+            className="flex h-8 items-center gap-1 rounded-full px-1"
+          >
             {Array.from({ length: beats }, (_, beat) => (
               <span
                 key={beat}
@@ -146,7 +156,7 @@ export function TransportBar() {
                 )}
               />
             ))}
-          </div>
+          </button>
         </div>
         {audio.error && <p className="mt-1 text-xs text-dom">{audio.error}</p>}
       </div>
